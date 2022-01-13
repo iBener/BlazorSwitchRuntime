@@ -1,0 +1,54 @@
+﻿@page "_Host"
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using BlazorSwitchRuntime.Client
+@using BlazorSwitchRuntime.Server
+@using Microsoft.Extensions.Options
+
+@inject IOptions<RenderModeOptions> RuntimeOptions
+@{
+    var renderMode = RuntimeOptions?.Value?.RenderMode ?? RenderMode.WebAssemblyPrerendered;
+    var webAssemblyMode = renderMode == RenderMode.WebAssembly || renderMode == RenderMode.WebAssemblyPrerendered;
+}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>HybridBlazor: @renderMode</title>
+    <base href="/" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="BlazorSwitchRuntime.Client.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <script>
+        window.hybridType = '@renderMode';
+        window.getHybridType = function () { return window.hybridType; }
+    </script>
+
+    <app>
+        <component type="typeof(App)" render-mode="@renderMode" />
+        @if (!webAssemblyMode)
+        {
+            <persist-component-state />
+        }
+    </app>
+    @if (webAssemblyMode)
+    {
+        <script src="_framework/blazor.webassembly.js"></script>
+    }
+    else
+    {
+        <script src="_framework/blazor.server.js"></script>
+    }
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">??</a>
+    </div>
+
+</body>
+</html>
